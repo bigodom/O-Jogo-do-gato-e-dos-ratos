@@ -3,15 +3,29 @@ from os import system
 
 
 def print_table(table: list[list[int]]) -> None:
-    print("-----------------------------------------")
+    row_count = 0
+    print("-----------------------------------------\n")
+    print("     0    1    2    3    4    5    6    7")
     for row in table:
-        for cell in row:
+        for indx, cell in enumerate(row):
             if cell == 0:
-                print("|", " ", "|", end="")
+                if indx == 0:
+                    print(f"{row_count}  |", " ", "|", end="")
+                    row_count += 1
+                else:
+                    print("|", " ", "|", end="")
             elif cell == 1:
-                print("|", "R", "|", end="")
+                if indx == 0:
+                    print(f"{row_count}  |", "R", "|", end="")
+                    row_count += 1
+                else:
+                    print("|", "R", "|", end="")
             else:
-                print("|", "C", "|", end="")
+                if indx == 0:
+                    print(f"{row_count}  |", "C", "|", end="")
+                    row_count += 1
+                else:
+                    print("|", "C", "|", end="")
         print("\n")
     print("-----------------------------------------")
 
