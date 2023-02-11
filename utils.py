@@ -87,9 +87,21 @@ def get_cat_possible_moves(
     current_x, current_y = current_position
     cells = []
 
+    lowest_y = 0
+    highest_closest = [current_x, current_y + 1]
+    is_closest = False
     for x, row in enumerate(table):
-        for y, _ in enumerate(row):
+        for y, value in enumerate(row):
             if x == current_x or y == current_y:
                 cells.append([x, y])
+                if value == 1 and y < current_y:
+                    lowest_y = y
+                if value == 1 and y > current_y and not is_closest:
+                    highest_closest = [x, y]
+                    is_closest = True
+                    break
 
-    return cells
+    cleared_cells = [item for item in cells if item[1] >= lowest_y]
+    cleared_cells.append(highest_closest)
+
+    return cleared_cells
