@@ -63,4 +63,20 @@ def get_diagonal_cells_by_position(x: int, y: int) -> list:
         if x - i >= 0 and y + i < n:
             cells.append([x - i, y + i])
 
+    print(f"DIAGONAIS: {cells}")
+
+    return cells
+
+
+def get_cat_possible_moves(
+    table: list[list[int]], current_position: list[int, int]
+) -> list[list[int, int]]:
+    current_x, current_y = current_position
+    cells = []
+
+    for x, row in enumerate(table):
+        for y, _ in enumerate(row):
+            if x == current_x or y == current_y:
+                cells.append([x, y])
+
     return cells
