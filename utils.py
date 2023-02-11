@@ -30,6 +30,19 @@ def print_table(table: list[list[int]]) -> None:
     print("-----------------------------------------")
 
 
+def get_user_input() -> list[int, int]:
+    while True:
+        try:
+            x, y = input("Digite as coordenadas (x,y) no tabuleiro: \n").split()
+            x = int(x)
+            y = int(y)
+            return [x, y]
+        except ValueError:
+            print(
+                "\nErro! Digite valores números no formato: X Y. Verifique se os valores são númericos e estão separados por um espaço.\n"
+            )
+
+
 def clear_console():
     os = platform.system().lower()
     if "windows" in os:
