@@ -44,8 +44,8 @@ class Game:
             if self.TABLE[x][y] == 1:
                 self.ALIVE_RATS -= 1
                 self.CURRENT_RATS_POSITION[x] = [float("inf"), float("inf")]
-            self.TABLE[x][y] = self.CURRENT_PLAYER
             self.TABLE[previous_cat_x][previous_cat_y] = 0
+            self.TABLE[x][y] = self.CURRENT_PLAYER
             self.CURRENT_CAT_POSITION = [x, y]
             self.CURRENT_PLAYER = 1
             clear_console()
