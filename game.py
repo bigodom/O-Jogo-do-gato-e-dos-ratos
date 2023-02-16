@@ -18,14 +18,29 @@ class Game:
         self.CURRENT_PLAYER = 2
         self.CURRENT_CAT_POSITION = [7, 3]
         self.ALIVE_RATS = 6
-        self.CURRENT_RATS_POSITION = [[1, 0], [1, 1], [1, 2], [1, 5], [1, 6], [1, 7]]
-        self.CURRENT_RATS_MOVES_COUNT = [0, 0, 0, 0, 0, 0]
+        self.CURRENT_RATS_POSITION = {
+            0: [1, 0],
+            1: [1, 1],
+            2: [1, 2],
+            3: [1, 5],
+            4: [1, 6],
+            5: [1, 7],
+        }
+        self.CURRENT_RATS_MOVES_COUNT = {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+        }
         self.WINNER = None
 
     def make_human_move(self) -> None:
         possible_cat_moves = get_cat_possible_moves(
             self.TABLE, self.CURRENT_CAT_POSITION
         )
+
         while True:
             print(f"Possíveis movimentos: \n{possible_cat_moves}\n")
             x, y = get_user_input()
@@ -37,6 +52,24 @@ class Game:
                 clear_console()
                 print_table(self.TABLE)
                 print("Movimento inválido!\n")
+
+    def __get_rats_possible_move(self) -> list[list[int, int]]:
+        cells = []
+
+        for rat, position in self.CURRENT_RATS_POSITION.items():
+            rat_x, rat_y = position
+            current_rat_moves = [[rat_x + 1, rat_y]]
+
+            if rat_x == float("inf"):
+                current_rat_moves = [[float("inf"), float("inf")]]
+
+            if self.CURRENT_RATS_MOVES_COUNT[rat] == 0:
+                current_rat_moves.append([rat_x + 2, rat_y])
+                cells.append(current_rat_moves)
+            else:
+                cells.append(current_rat_moves)
+
+        return cells
 
     def __exec_move(self, x: int, y: int, rat: int | None = None) -> None:
         if self.CURRENT_PLAYER == 2:
@@ -71,7 +104,7 @@ class Game:
             return [True, 2]
 
         cat_x, cat_y = self.CURRENT_CAT_POSITION
-        for position in self.CURRENT_RATS_POSITION:
+        for _, position in self.CURRENT_RATS_POSITION.items():
             rat_x, rat_y = position
             if rat_x == cat_x - 1 and (rat_y == cat_y + 1 or rat_y == cat_y - 1):
                 self.WINNER = 1
@@ -81,6 +114,7 @@ class Game:
 
     def make_ia_move(self) -> None:
         print("IA VEZ MOCK")
+        print(f"Movimentos dos ratos: {self.__get_rats_possible_move()}")
         self.CURRENT_PLAYER = 2
 
     def play(self):
