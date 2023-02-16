@@ -1,4 +1,4 @@
-from utils import clear_console, get_cat_possible_moves, get_user_input, print_table
+from utils import clear_console, get_user_input, print_table
 
 
 class Game:
@@ -37,9 +37,7 @@ class Game:
         self.WINNER = None
 
     def make_human_move(self) -> None:
-        possible_cat_moves = get_cat_possible_moves(
-            self.TABLE, self.CURRENT_CAT_POSITION
-        )
+        possible_cat_moves = self.__get_cat_possible_moves()
 
         while True:
             print(f"Possíveis movimentos: \n{possible_cat_moves}\n")
@@ -53,7 +51,7 @@ class Game:
                 print_table(self.TABLE)
                 print("Movimento inválido!\n")
 
-    def __get_rats_possible_move(self) -> list[list[int, int]]:
+    def __get_rats_possible_moves(self) -> list[list[int, int]]:
         cells = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None}
 
         for rat, position in self.CURRENT_RATS_POSITION.items():
@@ -70,6 +68,29 @@ class Game:
                 cells[rat] = current_rat_moves
 
         return cells
+
+    def __get_cat_possible_moves(self) -> list:
+        current_x, current_y = self.CURRENT_CAT_POSITION
+        cells = []
+
+        lowest_y = 0
+        highest_closest = [current_x, current_y + 1]
+        is_closest = False
+        for x, row in enumerate(self.TABLE):
+            for y, value in enumerate(row):
+                if x == current_x or y == current_y:
+                    cells.append([x, y])
+                    if value == 1 and y < current_y:
+                        lowest_y = y
+                    if value == 1 and y > current_y and not is_closest:
+                        highest_closest = [x, y]
+                        is_closest = True
+                        break
+
+        cleared_cells = [item for item in cells if item[1] >= lowest_y]
+        cleared_cells.append(highest_closest)
+
+        return cleared_cells
 
     def __exec_move(self, x: int, y: int, rat: int | None = None) -> None:
         if self.CURRENT_PLAYER == 2:
@@ -114,7 +135,7 @@ class Game:
 
     def make_ia_move(self) -> None:
         print("IA VEZ MOCK")
-        print(f"Movimentos dos ratos: {self.__get_rats_possible_move()}")
+        print(f"Movimentos dos ratos: {self.__get_rats_possible_moves()}")
         self.CURRENT_PLAYER = 2
 
     def play(self):
