@@ -54,7 +54,7 @@ class Game:
                 print("Movimento inválido!\n")
 
     def __get_rats_possible_move(self) -> list[list[int, int]]:
-        cells = []
+        cells = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None}
 
         for rat, position in self.CURRENT_RATS_POSITION.items():
             rat_x, rat_y = position
@@ -65,9 +65,9 @@ class Game:
 
             if self.CURRENT_RATS_MOVES_COUNT[rat] == 0:
                 current_rat_moves.append([rat_x + 2, rat_y])
-                cells.append(current_rat_moves)
+                cells[rat] = current_rat_moves
             else:
-                cells.append(current_rat_moves)
+                cells[rat] = current_rat_moves
 
         return cells
 
