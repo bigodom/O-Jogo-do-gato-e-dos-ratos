@@ -43,7 +43,7 @@ class Game:
             print(f"Possíveis movimentos: \n{possible_cat_moves}\n")
             x, y = get_user_input()
 
-            if [x, y] in possible_cat_moves:
+            if (x, y) in possible_cat_moves:
                 self.__exec_move(x, y)
                 break
             else:
@@ -90,7 +90,7 @@ class Game:
         cleared_cells = [item for item in cells if item[1] >= lowest_y]
         cleared_cells.append(highest_closest)
 
-        return cleared_cells
+        return {tuple(x) for x in cleared_cells}
 
     def __exec_move(self, x: int, y: int, rat: int | None = None) -> None:
         if self.CURRENT_PLAYER == 2:
