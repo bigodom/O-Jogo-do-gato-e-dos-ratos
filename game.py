@@ -51,7 +51,7 @@ class Game:
                 print_table(self.TABLE)
                 print("Movimento inválido!\n")
 
-    def __get_rats_possible_moves(self) -> list[list[int, int]]:
+    def __get_rats_possible_moves(self) -> dict:
         cells = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None}
 
         for rat, position in self.CURRENT_RATS_POSITION.items():
@@ -106,7 +106,7 @@ class Game:
             previous_cat_x, previous_cat_y = self.CURRENT_CAT_POSITION
             if self.TABLE[x][y] == 1:
                 self.ALIVE_RATS -= 1
-                self.CURRENT_RATS_POSITION[x] = [float("inf"), float("inf")]
+                self.CURRENT_RATS_POSITION[x] = [999, 999]
             self.TABLE[previous_cat_x][previous_cat_y] = 0
             self.TABLE[x][y] = self.CURRENT_PLAYER
             self.CURRENT_CAT_POSITION = [x, y]
