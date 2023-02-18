@@ -89,12 +89,13 @@ class Game:
             if self.TABLE[line][cat_y] == 1:
                 cells.add((line, cat_y))
                 y_blocking_cell = line
+                break
 
             if self.TABLE[line][cat_y] == 0:
                 cells.add((line, cat_y))
 
         if y_blocking_cell:
-            cells = filter(lambda x: x[0] >= y_blocking_cell, cells)
+            cells = filter(lambda x: x[1] >= y_blocking_cell, cells)
 
         if x_blocking_cell:
             cells = filter(lambda x: x[1] <= x_blocking_cell, cells)
