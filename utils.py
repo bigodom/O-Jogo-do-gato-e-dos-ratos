@@ -79,3 +79,59 @@ def get_diagonal_cells_by_position(x: int, y: int) -> list:
     print(f"DIAGONAIS: {cells}")
 
     return cells
+
+
+def get_cat_x_path(table: list[list[int]], position: list[int, int]) -> set[tuple[int, int]]:
+    cat_x, cat_y = position
+    cells = set()
+
+    # A partir da posição atual do gato (X) para frente
+    for index, value in enumerate(table[cat_x][cat_y:]):
+        if value == 0:
+            cells.add((cat_x, index+cat_y))
+
+        if value == 1:
+            cells.add((cat_x, index+cat_y))
+            break
+
+    # A partir da posição atual do gato (X) para tras
+    for index, value in enumerate(table[cat_x][cat_y::-1]):
+        y_axis = cat_y - index
+
+        if value == 0:
+            cells.add((cat_x, y_axis))
+
+        if value == 1:
+            cells.add((cat_x, y_axis))
+            break
+
+    return cells
+
+
+def get_cat_y_path(table: list[list[int]], position: list[int, int]) -> set[tuple[int, int]]:
+    cat_x, cat_y = position
+    cells = set()
+
+    # Percorrendo para cima da posição Y
+    for i in range(cat_x, -1, -1):
+        value = table[i][cat_y]
+
+        if value == 0:
+            cells.add((i, cat_y))
+
+        if value == 1:
+            cells.add((i, cat_y))
+            break
+
+    # Percorrendo para baixo da posição Y
+    for i in range(cat_x+1, len(table)):
+        value = table[i][cat_y]
+
+        if value == 0:
+            cells.add((i, cat_y))
+
+        if value == 1:
+            cells.add((i, cat_y))
+            break
+
+    return cells

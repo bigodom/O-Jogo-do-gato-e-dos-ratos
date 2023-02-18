@@ -1,4 +1,4 @@
-from utils import clear_console, get_user_input, print_table
+from utils import clear_console, get_user_input, print_table, get_cat_x_path, get_cat_y_path
 
 
 class Game:
@@ -70,44 +70,18 @@ class Game:
         return cells
 
     def __get_cat_possible_moves(self):
-        cat_x, cat_y = self.CURRENT_CAT_POSITION
-        cells = set()
-        y_blocking_cell = None
-        x_blocking_cell = None
+        x_axis_moves = get_cat_x_path(self.TABLE, self.CURRENT_CAT_POSITION)
+        y_axis_moves = get_cat_y_path(self.TABLE, self.CURRENT_CAT_POSITION)
+        moves = x_axis_moves | y_axis_moves
 
-        for column in range(len(self.TABLE[cat_x])):
-            value = self.TABLE[cat_x][column]
-            if value == 0:
-                cells.add((cat_x, column))
-
-            if value == 1:
-                cells.add((cat_x, column))
-                x_blocking_cell = column
-                break
-
-        for line in range(len(self.TABLE)):
-            if self.TABLE[line][cat_y] == 1:
-                cells.add((line, cat_y))
-                y_blocking_cell = line
-                break
-
-            if self.TABLE[line][cat_y] == 0:
-                cells.add((line, cat_y))
-
-        if y_blocking_cell:
-            cells = filter(lambda x: x[1] >= y_blocking_cell, cells)
-
-        if x_blocking_cell:
-            cells = filter(lambda x: x[1] <= x_blocking_cell, cells)
-
-        return sorted(cells, key=lambda pair: (pair[0], pair[1]))
+        return sorted(moves, key=lambda pair: (pair[0], pair[1]))
 
     def __exec_move(self, x: int, y: int, rat: int | None = None) -> None:
         if self.CURRENT_PLAYER == 2:
             previous_cat_x, previous_cat_y = self.CURRENT_CAT_POSITION
             if self.TABLE[x][y] == 1:
                 self.ALIVE_RATS -= 1
-                self.CURRENT_RATS_POSITION[x] = [999, 999]
+                self.CURRENT_RATS_POSITION[x] = [float("inf"), float("inf")]
             self.TABLE[previous_cat_x][previous_cat_y] = 0
             self.TABLE[x][y] = self.CURRENT_PLAYER
             self.CURRENT_CAT_POSITION = [x, y]
