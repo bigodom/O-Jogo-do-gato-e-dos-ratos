@@ -15,7 +15,7 @@ class Game:
         ]
         self.HUMAN = 2
         self.AI = 1
-        self.CURRENT_PLAYER = 2
+        self.CURRENT_PLAYER = 1
         self.CURRENT_CAT_POSITION = [7, 3]
         self.ALIVE_RATS = 6
         self.CURRENT_RATS_POSITION = {
@@ -69,28 +69,37 @@ class Game:
 
         return cells
 
-    def __get_cat_possible_moves(self) -> list:
-        current_x, current_y = self.CURRENT_CAT_POSITION
-        cells = []
+    def __get_cat_possible_moves(self):
+        cat_x, cat_y = self.CURRENT_CAT_POSITION
+        cells = set()
+        y_blocking_cell = None
+        x_blocking_cell = None
 
-        lowest_y = 0
-        highest_closest = [current_x, current_y + 1]
-        is_closest = False
-        for x, row in enumerate(self.TABLE):
-            for y, value in enumerate(row):
-                if x == current_x or y == current_y:
-                    cells.append([x, y])
-                    if value == 1 and y < current_y:
-                        lowest_y = y
-                    if value == 1 and y > current_y and not is_closest:
-                        highest_closest = [x, y]
-                        is_closest = True
-                        break
+        for column in range(len(self.TABLE[cat_x])):
+            value = self.TABLE[cat_x][column]
+            if value == 0:
+                cells.add((cat_x, column))
 
-        cleared_cells = [item for item in cells if item[1] >= lowest_y]
-        cleared_cells.append(highest_closest)
+            if value == 1:
+                cells.add((cat_x, column))
+                x_blocking_cell = column
+                break
 
-        return {tuple(x) for x in cleared_cells}
+        for line in range(len(self.TABLE)):
+            if self.TABLE[line][cat_y] == 1:
+                cells.add((line, cat_y))
+                y_blocking_cell = line
+
+            if self.TABLE[line][cat_y] == 0:
+                cells.add((line, cat_y))
+
+        if y_blocking_cell:
+            cells = filter(lambda x: x[0] >= y_blocking_cell, cells)
+
+        if x_blocking_cell:
+            cells = filter(lambda x: x[1] <= x_blocking_cell, cells)
+
+        return sorted(cells, key=lambda pair: (pair[0], pair[1]))
 
     def __exec_move(self, x: int, y: int, rat: int | None = None) -> None:
         if self.CURRENT_PLAYER == 2:
