@@ -9,6 +9,7 @@ Módulo core para executar o Jogo do gato e dos ratos.
 from utils import clear_console, get_user_input, print_table, get_cat_x_path, get_cat_y_path
 from math import inf
 from copy import deepcopy
+from random import choice
 
 
 class Game:
@@ -45,6 +46,7 @@ class Game:
             5: 0,
         }
         self.WINNER = None
+        self.FIRST_TURN = True
 
 
     def __make_human_move(self) -> None:
@@ -130,6 +132,34 @@ class Game:
             self.CURRENT_PLAYER = 2
             clear_console()
             print_table(self.TABLE)
+
+    def __eval(self, copy: list[list[int] | None]):
+        alive_rats = 0
+        cat_position = None
+        rats_position = {0: [None, None], 1: [None, None], 2: [None, None], 3: [None, None], 4: [None, None], 5: [None, None]}
+        for cell in copy[7]:
+            if cell == 1:
+                return 1
+
+        for line in range(len(copy)):
+            for column in range(len(copy[line])):
+                if copy[line][column] == 1:
+                    alive_rats += 1
+                    rats_position[self.__map_y_to_rat(column)] = [line][column]
+
+                if copy[line][column] == 2:
+                    cat_position = copy[line][column]
+
+            if alive_rats == 0:
+                return -1
+
+            cat_x, cat_y = cat_position
+            for _, position in rats_position.items():
+                rat_x, rat_y = position
+                if rat_x == cat_x - 1 and (rat_y == cat_y + 1 and rat_y == cat_y - 1):
+                    return 1
+
+            return 0
 
     def __minimax(self, state: list[list[int]], depth: int, player: int):
         if player == 1:
@@ -221,11 +251,15 @@ class Game:
         Função que executa o algoritmo MINMAX e realiza o movimento da IA
         :return: Tabuleiro atualizado com novas posições
         """
-        print("IA VEZ MOCK")
-        print(self.__get_rats_possible_moves())
         print("IA pensando ...")
-        x, y, value = self.__minimax(deepcopy(self.TABLE), len(self.__get_rats_possible_moves()), 1)
-        print(f"A IA fez a jogada ({x}, {y}) com o rato {y}, com valor de avaliação: {value}")
+
+        if self.FIRST_TURN:
+            x, y = choice(choice(self.__get_rats_possible_moves()))
+            self.FIRST_TURN = False
+        else:
+            x, y, _ = self.__minimax(deepcopy(self.TABLE), len(self.__get_rats_possible_moves()), 1)
+
+        print(f"A IA fez a jogada ({x}, {y}) com o rato {self.__map_y_to_rat(y)}")
         self.__exec_move(x, y, self.__map_y_to_rat(y))
         self.CURRENT_PLAYER = 2
 
