@@ -1,3 +1,11 @@
+"""
+@author: Filipe Augusto, Pedro Augusto
+"""
+
+"""
+Módulo core para executar o Jogo do gato e dos ratos.
+"""
+
 from utils import clear_console, get_user_input, print_table, get_cat_x_path, get_cat_y_path
 
 
@@ -36,7 +44,12 @@ class Game:
         }
         self.WINNER = None
 
-    def make_human_move(self) -> None:
+
+    def __make_human_move(self) -> None:
+        """
+        Função que executa o movimento do gato
+        :return: Tabuleiro atualizado com nova posição do gato
+        """
         possible_cat_moves = self.__get_cat_possible_moves()
 
         while True:
@@ -52,6 +65,10 @@ class Game:
                 print("Movimento inválido!\n")
 
     def __get_rats_possible_moves(self) -> dict:
+        """
+        Função que retorna os possíveis movimentos para cada rato vivo
+        :return: Dicionário com movimentos possíveis para cada rato
+        """
         cells = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None}
 
         for rat, position in self.CURRENT_RATS_POSITION.items():
@@ -70,6 +87,10 @@ class Game:
         return cells
 
     def __get_cat_possible_moves(self):
+        """
+        Função que retorna uma lista de movimentos possíveis para o jogador humano
+        :return: Lista de movimentos possíveis para o gato
+        """
         x_axis_moves = get_cat_x_path(self.TABLE, self.CURRENT_CAT_POSITION)
         y_axis_moves = get_cat_y_path(self.TABLE, self.CURRENT_CAT_POSITION)
         moves = x_axis_moves | y_axis_moves
@@ -77,6 +98,13 @@ class Game:
         return sorted(moves, key=lambda pair: (pair[0], pair[1]))
 
     def __exec_move(self, x: int, y: int, rat: int | None = None) -> None:
+        """
+        Executa o movimento escolhido pelo jogador atual
+        :param x: Linha no tabuleiro
+        :param y: Coluna no tabuleiro
+        :param rat: Rato escolhido, caso seja a vez da IA
+        :return: Tabuleiro atualizado com novas posições
+        """
         if self.CURRENT_PLAYER == 2:
             previous_cat_x, previous_cat_y = self.CURRENT_CAT_POSITION
             if self.TABLE[x][y] == 1:
@@ -99,6 +127,10 @@ class Game:
             print_table(self.TABLE)
 
     def __check_win(self) -> list[bool, int] | bool:
+        """
+        Função que verifica se algum jogador venceu o jogo
+        :return: Jogador vencedor ou False se o jogo não possui vencedor
+        """
         for cell in self.TABLE[7]:
             if cell == 1:
                 self.WINNER = 1
@@ -117,17 +149,24 @@ class Game:
 
         return False
 
-    def make_ia_move(self) -> None:
+    def __make_ia_move(self) -> None:
+        """
+        Função que executa o algoritmo MINMAX e realiza o movimento da IA
+        :return: Tabuleiro atualizado com novas posições
+        """
         print("IA VEZ MOCK")
         print(f"Movimentos dos ratos: {self.__get_rats_possible_moves()}")
         self.CURRENT_PLAYER = 2
 
     def play(self):
+        """
+        Função responsável por inicializar o jogo
+        """
         clear_console()
         print_table(self.TABLE)
 
         while not self.WINNER:
-            self.make_human_move() if self.CURRENT_PLAYER == 2 else self.make_ia_move()
+            self.__make_human_move() if self.CURRENT_PLAYER == 2 else self.__make_ia_move()
             self.__check_win()
 
         print("O GATO VENCEU!!!") if self.WINNER == 2 else print("OS RATOS VENCERAM!!!")
