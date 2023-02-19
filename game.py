@@ -7,6 +7,8 @@ Módulo core para executar o Jogo do gato e dos ratos.
 """
 
 from utils import clear_console, get_user_input, print_table, get_cat_x_path, get_cat_y_path
+from math import inf
+from copy import deepcopy
 
 
 class Game:
@@ -73,10 +75,13 @@ class Game:
 
         for rat, position in self.CURRENT_RATS_POSITION.items():
             rat_x, rat_y = position
-            current_rat_moves = [[rat_x + 1, rat_y]]
 
-            if rat_x == float("inf"):
-                current_rat_moves = [[float("inf"), float("inf")]]
+            if rat_x == inf:
+                current_rat_moves = [[inf, inf]]
+            else:
+                current_rat_moves = [[rat_x + 1, rat_y]] if self.TABLE[rat_x + 1][rat_y] == 0 else [[inf, inf]]
+
+
 
             if self.CURRENT_RATS_MOVES_COUNT[rat] == 0:
                 current_rat_moves.append([rat_x + 2, rat_y])
@@ -109,7 +114,7 @@ class Game:
             previous_cat_x, previous_cat_y = self.CURRENT_CAT_POSITION
             if self.TABLE[x][y] == 1:
                 self.ALIVE_RATS -= 1
-                self.CURRENT_RATS_POSITION[x] = [float("inf"), float("inf")]
+                self.CURRENT_RATS_POSITION[self.__map_y_to_rat(y)] = [inf, inf]
             self.TABLE[previous_cat_x][previous_cat_y] = 0
             self.TABLE[x][y] = self.CURRENT_PLAYER
             self.CURRENT_CAT_POSITION = [x, y]
@@ -126,11 +131,63 @@ class Game:
             clear_console()
             print_table(self.TABLE)
 
+    def __minimax(self, state: list[list[int]], depth: int, player: int):
+        if player == 1:
+            best_value = [-1, -1, -inf]
+        else:
+            best_value = [-1, -1, +inf]
+
+        if depth == 0  or self.__check_win():
+            if self.WINNER == None:
+                score = 0
+            elif self.WINNER == 1:
+                score = 1
+            else:
+                score = 2
+            return [-1, -1, score]
+
+        if player == 1:
+            for rat, _ in self.CURRENT_RATS_POSITION.items():
+                for cell in self.__get_rats_possible_moves()[rat]:
+                    x, y = cell
+                    if x == inf or y == inf:
+                        break
+                    state[x][y] = player
+                    score = self.__minimax(state, depth - 1, 2)
+                    state[x][y] = 0
+                    score[0], score[1] = x, y
+
+                    if player == 1:
+                        if score[2] > best_value[2]:
+                            best_value = score
+                    else:
+                        if score[2] < best_value[2]:
+                            best_value = score
+
+        else:
+            for move in self.__get_cat_possible_moves():
+                x, y = move
+                state[x][y] = player
+                score = self.__minimax(state, depth - 1, 1)
+                state[x][y] = 0
+                score[0], score[1] = x, y
+
+                if player == 1:
+                    if score[2] > best_value[2]:
+                        best_value = score
+                else:
+                    if score[2] < best_value[2]:
+                        best_value = score
+
+        return best_value
+
+
     def __check_win(self) -> list[bool, int] | bool:
         """
         Função que verifica se algum jogador venceu o jogo
         :return: Jogador vencedor ou False se o jogo não possui vencedor
         """
+
         for cell in self.TABLE[7]:
             if cell == 1:
                 self.WINNER = 1
@@ -143,11 +200,21 @@ class Game:
         cat_x, cat_y = self.CURRENT_CAT_POSITION
         for _, position in self.CURRENT_RATS_POSITION.items():
             rat_x, rat_y = position
-            if rat_x == cat_x - 1 and (rat_y == cat_y + 1 or rat_y == cat_y - 1):
+            if rat_x == cat_x - 1 and (rat_y == cat_y + 1 and rat_y == cat_y - 1):
                 self.WINNER = 1
                 return [True, 1]
 
         return False
+
+    def __map_y_to_rat(self, y):
+        if y <= 2:
+            return y
+        if y == 5:
+            return 3
+        if y == 6:
+            return 4
+        if y == 7:
+            return 5
 
     def __make_ia_move(self) -> None:
         """
@@ -155,7 +222,11 @@ class Game:
         :return: Tabuleiro atualizado com novas posições
         """
         print("IA VEZ MOCK")
-        print(f"Movimentos dos ratos: {self.__get_rats_possible_moves()}")
+        print(self.__get_rats_possible_moves())
+        print("IA pensando ...")
+        x, y, value = self.__minimax(deepcopy(self.TABLE), len(self.__get_rats_possible_moves()), 1)
+        print(f"A IA fez a jogada ({x}, {y}) com o rato {y}, com valor de avaliação: {value}")
+        self.__exec_move(x, y, self.__map_y_to_rat(y))
         self.CURRENT_PLAYER = 2
 
     def play(self):
