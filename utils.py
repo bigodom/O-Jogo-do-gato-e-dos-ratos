@@ -119,10 +119,10 @@ def get_cat_x_path(table: list[list[int]], position: list[int, int]) -> set[tupl
     # A partir da posição atual do gato (X) para frente
     for index, value in enumerate(table[cat_x][cat_y:]):
         if value == 0:
-            cells.add((cat_x, index+cat_y))
+            cells.add((cat_x, index + cat_y))
 
         if value == 1:
-            cells.add((cat_x, index+cat_y))
+            cells.add((cat_x, index + cat_y))
             break
 
     # A partir da posição atual do gato (X) para tras
@@ -161,7 +161,7 @@ def get_cat_y_path(table: list[list[int]], position: list[int, int]) -> set[tupl
             break
 
     # A partir da posição atual do gato (Y) para baixo
-    for i in range(cat_x+1, len(table)):
+    for i in range(cat_x + 1, len(table)):
         value = table[i][cat_y]
 
         if value == 0:
@@ -172,3 +172,17 @@ def get_cat_y_path(table: list[list[int]], position: list[int, int]) -> set[tupl
             break
 
     return cells
+
+
+
+
+
+def map_y_to_rat(y):
+    if y <= 2:
+        return y
+    if y == 5:
+        return 3
+    if y == 6:
+        return 4
+    if y == 7:
+        return 5
