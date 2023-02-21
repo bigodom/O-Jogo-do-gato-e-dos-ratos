@@ -90,7 +90,7 @@ class Game:
         Função que retorna os possíveis movimentos para cada rato vivo
         :return: Dicionário com movimentos possíveis para cada rato
         """
-        cells = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None}
+        cells = {0: [], 1: [], 2: [], 3: [], 4: [], 5: []}
 
         if is_max:
             positions = self.MAX_RATS_POSITION
@@ -103,14 +103,21 @@ class Game:
 
         for rat, position in positions.items():
             rat_x, rat_y = position
+            current_rat_moves = []
 
-            if rat_x == inf:
-                current_rat_moves = [[inf, inf]]
+            if rat_x == inf or rat_x == 7:
+                continue
 
-            elif rat_x == 7:
-                current_rat_moves = [[inf, inf]]
             else:
-                current_rat_moves = [[rat_x + 1, rat_y]] if table[rat_x + 1][rat_y] == 0 else [[inf, inf]]
+                if table[rat_x + 1][rat_y] == 0:
+                    current_rat_moves.append([rat_x + 1, rat_y])
+
+                if rat_y != 7:
+                    if table[rat_x + 1][rat_y + 1] == 2:
+                        current_rat_moves.append([rat_x + 1, rat_y + 1])
+                if rat_y != 0:
+                    if table[rat_x + 1][rat_y - 1] == 2:
+                        current_rat_moves.append([rat_x + 1, rat_y + 1])
 
             if moves_count[rat] == 0 and rat_x != inf:
                 current_rat_moves.append([rat_x + 2, rat_y])
@@ -202,40 +209,49 @@ class Game:
         copy[x][y] = 2
         self.MIN_CAT_POSITION = [x, y]
 
-    def __minimax(self, state: list[list[int]], player: int):
+    def __get_rats_max_possible_moves(self, state: list[list[int]]):
+        moves = []
+        for rat, position in self.MAX_RATS_POSITION.items():
+            for cell in self.__get_rats_possible_moves(is_max=True, copy=state)[rat]:
+                x, y = cell
+                if x != inf and y != inf:
+                    moves.append([rat, x, y])
 
-        if self.__eval(state) != 0:
-            score = self.__eval(state)
-            return [-1, -1, score]
+        return moves
 
-        if player == 1:
-            best_move = [-1, -1, -inf]
-            for rat, position in self.MAX_RATS_POSITION.items():
-                for cell in self.__get_rats_possible_moves(is_max=True, copy=state)[rat]:
-                    x, y = cell
-                    if x == inf or y == inf:
-                        break
-                    self.__exec_max_move(state, x, y, rat)
-                    score = self.__minimax(state, 2)
-                    score[0], score[1] = x, y
+    def __minimax(self, state: list[list[int]], depth: int, alpha: int, beta: int, max_player: bool):
 
-                    if score[2] > best_move[2]:
-                        best_move = score
+        if self.__eval(state) != 0 or depth == 0:
+            utility = self.__eval(state)
+            return utility
 
-            return best_move
+        if max_player:
+            max_eval = -inf
+            for action in self.__get_rats_max_possible_moves(state):
+                new_state = deepcopy(state)
+                rat, x, y = action
+                self.__exec_max_move(new_state, x, y, rat)
+                current_eval = self.__minimax(new_state, depth - 1, alpha, beta, False)
+                if current_eval > max_eval:
+                    max_eval = current_eval
+                alpha = max(alpha, current_eval)
+                if beta <= alpha:
+                    break
+            return max_eval
 
         else:
-            best_move = [-1, -1, +inf]
+            min_eval = inf
             for move in self.__get_cat_possible_moves(state):
+                new_state = deepcopy(state)
                 x, y = move
-                self.__exec_min_move(state, x, y)
-                score = self.__minimax(state, 1)
-                score[0], score[1] = x, y
-
-                if score[2] < best_move[2]:
-                    best_value = score
-
-            return best_move
+                self.__exec_min_move(new_state, x, y)
+                current_eval = self.__minimax(new_state, depth - 1, alpha, beta, True)
+                if current_eval < min_eval:
+                    min_eval = current_eval
+                beta = min(beta, current_eval)
+                if beta <= alpha:
+                    break
+            return min_eval
 
     def __check_win(self) -> list[bool, int] | bool:
         """
@@ -264,17 +280,31 @@ class Game:
     def __make_ia_move(self) -> None:
         """
         Função que executa o algoritmo MINMAX e realiza o movimento da IA
+        Caso seja o primeiro turno, é executado um movimento aleatório
+        Caso contrario, é executado o minimax para obter o valor da melhor jogada
+        Após obter o valor, percorremos o array de movimentos para encontrar o movimento com respectivo valor
         :return: Tabuleiro atualizado com novas posições
         """
         print("IA pensando ...")
 
         if self.FIRST_TURN:
-            x, y = choice(choice(self.__get_rats_possible_moves()))
+            moves = self.__get_rats_possible_moves()
+            x, y = choice(choice(moves))
+            best_value = "aleatório"
             self.FIRST_TURN = False
         else:
-            x, y, _ = self.__minimax(deepcopy(self.TABLE), 1)
+            best_value = self.__minimax(deepcopy(self.TABLE), len(self.__get_rats_possible_moves()), -inf, inf, True)
+            best_move = None
+            for moves in self.__get_rats_possible_moves().items():
+                if len(moves[1]) != 0:
+                    value = self.__minimax(deepcopy(self.TABLE), len(self.__get_rats_possible_moves()) - 1, -inf, inf,
+                                           False)
+                    if value == best_value:
+                        best_move = moves[1][0]
 
-        print(f"A IA fez a jogada ({x}, {y}) com o rato {map_y_to_rat(y)}")
+            x, y = best_move
+
+        print(f"A IA fez a jogada ({x}, {y}) com o rato {map_y_to_rat(y)} com valor de {best_value}")
         self.__exec_move(x, y, map_y_to_rat(y))
         self.CURRENT_PLAYER = 2
 
