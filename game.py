@@ -306,7 +306,7 @@ class Game:
                 self.__exec_max_move(state, x, y, rat)
                 current_eval, _ = self.__minimax(state, depth - 1, False)
                 self.__undo_max_move(state, undo_x, undo_y, rat)
-                if current_eval < max_eval or best_move is None:
+                if current_eval > max_eval or best_move is None:
                     max_eval = current_eval
                     best_move = [x, y]
             return max_eval, best_move
@@ -320,7 +320,7 @@ class Game:
                 self.__exec_min_move(state, x, y)
                 current_eval, _ = self.__minimax(state, depth - 1, True)
                 self.undo_min_move(state, undo_x, undo_y)
-                if current_eval > min_eval or best_move is None:
+                if current_eval < min_eval or best_move is None:
                     min_eval = current_eval
                     best_move = [x, y]
             return min_eval, best_move
@@ -366,7 +366,7 @@ class Game:
         print("IA pensando ...")
         if self.FIRST_TURN:
             x, y = choice(choice(self.__get_rats_possible_moves()))
-            value = "aleatório"
+            value = "aleatório (1a jogada)"
             self.FIRST_TURN = False
         else:
             value, move = self.__minimax(deepcopy(self.TABLE), self.ALIVE_RATS, True)
@@ -374,18 +374,17 @@ class Game:
                 print("OS RATOS IRÃO PERDER! A IA não possui movimentos!")
                 self.WINNER = 2
                 return
-            print(f"RETORNO MINIMAX: {move}. valor da jogada: {value}")
             x, y = move
 
         if map_y_to_rat(y) not in self.CURRENT_RATS_POSITION:
-            if map_y_to_rat(y - 1) in self.CURRENT_RATS_POSITION == x:
+            if map_y_to_rat(y - 1) in self.CURRENT_RATS_POSITION:
                 rat = map_y_to_rat(y - 1)
             else:
                 rat = map_y_to_rat(y + 1)
         else:
             rat = map_y_to_rat(y)
-        print(f"A IA fez a jogada ({x}, {y}) com o rato {rat} com valor heruístico = {value}")
         self.__exec_move(x, y, rat)
+        print(f"A IA fez a jogada ({x}, {y}) com o rato {rat} com valor heruístico = {value}")
         self.CURRENT_PLAYER = 2
 
     def play(self):

@@ -250,12 +250,14 @@ def get_rats_possible_moves_from_state(state: list[list[int]]):
         if position is not None:
             x, y = position
             if x != inf or y != inf or x != 7:
+                if y != 0 and state[x + 1][y - 1] == 2:
+                    moves.append([rat, x + 1, y - 1])
+                    break
                 if state[x + 1][y] == 0:
                     moves.append([rat, x + 1, y])
                 if y != 7 and state[x + 1][y + 1] == 2:
                     moves.append([rat, x + 1, y + 1])
-                if y != 0 and state[x + 1][y - 1] == 2:
-                    moves.append([rat, x + 1, y - 1])
+
                 if x == 1:
                     moves.append([rat, x + 2, y])
 
